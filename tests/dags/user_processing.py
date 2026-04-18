@@ -52,7 +52,7 @@ def user_processing():
         
         return PokeReturnValue(is_done=condition, xcom_value={'ipAddress': ip_address})
 
-    extract_user_data >> check_sensor
+    extract_user_data >> is_api_available
 
 class CheckUserDataSensor(BaseSensorOperator):
     def poke(self, context):
