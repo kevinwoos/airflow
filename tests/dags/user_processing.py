@@ -4,6 +4,8 @@ from airflow.decorators import dag, task
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.decorators import task
 from datetime import datetime
+from airflow.sensors.base import BaseSensorOperator, PokeReturnValue
+import requests
 # import pandas as pd
 
 @dag(
@@ -36,16 +38,26 @@ def user_processing():
         create_table()
 
     # 데이터 변환 task
-    # @task
-    # def transform_user_data(sql_result):
-    #     """SQL 쿼리 결과를 변환합니다"""
-    #     df = pd.DataFrame(sql_result)
-    #     # 데이터 변환 로직 추가
-    #     df['processed_date'] = datetime.now()
-    #     return df.to_dict('records')
+    @task.sensor()
+    def is_api_available():
+        response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
+        print(f"API Response Status Code: {response.status_code}")
+        if  response.status_code == 200:
+            condition = True
+            data = response.json()
+            ip_address = data['metadata']['ipAddress']
+        else:
+            condition = False
+            ip_address = None
+        
+        return PokeReturnValue(is_done=condition, xcom_value={'ipAddress': ip_address})
 
-    # # Task 의존성 설정
-    # result = create_table
-    # transformed_data = transform_user_data(result)
+    extract >> check_sensor
+
+class CheckUserDataSensor(BaseSensorOperator):
+    def poke(self, context):
+        # 조건 체크: 예를 들어, users 테이블에 데이터가 있는지 확인
+        # 간단한 예시로 True를 반환
+        return PokeReturnValue(is_done=True, xcom_value={'status': 'data_ready', 'message': 'User data is available'})
 
 user_processing()
