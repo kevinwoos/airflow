@@ -38,7 +38,7 @@ def user_processing():
         create_table()
 
     # 데이터 변환 task
-    @task.sensor()
+    @task.sensor(poke_interval=30, timeout=600)
     def is_api_available():
         response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
         print(f"API Response Status Code: {response.status_code}")
@@ -52,7 +52,8 @@ def user_processing():
         
         return PokeReturnValue(is_done=condition, xcom_value={'ipAddress': ip_address})
 
-    extract_user_data >> is_api_available
+    # Task 의존성 설정
+    extract_user_data() >> is_api_available()
 
 class CheckUserDataSensor(BaseSensorOperator):
     def poke(self, context):
