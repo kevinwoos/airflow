@@ -54,7 +54,8 @@ def user_processing():
         return PokeReturnValue(is_done=condition, xcom_value={'ipAddress': ip_address})
 
     # Task 의존성 설정
-    extract_user_data() >> is_api_available()
+    # extract_user_data() >> is_api_available()
+    is_api_available()
 
 class CheckUserDataSensor(BaseSensorOperator):
     def poke(self, context):
