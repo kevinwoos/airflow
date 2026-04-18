@@ -38,8 +38,8 @@ def user_processing():
         create_table()
 
     # 데이터 변환 task
-    @task.sensor(poke_interval=30, timeout=600)
-    def is_api_available():
+    @task.sensor(poke_interval=30, timeout=300)
+    def is_api_available()  -> PokeReturnValue:
         response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
         print(f"API Response Status Code: {response.status_code}")
         if  response.status_code == 200:
