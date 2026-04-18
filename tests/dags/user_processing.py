@@ -7,29 +7,33 @@ from datetime import datetime
 # import pandas as pd
 
 @dag(
-    dag_id='user_processing',
+    dag_id="user_processing",
     start_date=datetime(2026, 4, 19),
-    schedule_interval='@daily',
+    schedule="@daily",
     catchup=False,
-    tags=['data-processing']
+    tags=["data-processing"],
 )
 
 def user_processing():
-    # 테이블 생성 task
-    create_table = SQLExecuteQueryOperator(
-        task_id='create_table',
-        sql="""
-        CREATE TABLE IF NOT EXISTS users (
-            id INT PRIMARY KEY,
-            firstname VARCHAR(255),
-            lastname VARCHAR(255),
-            email VARCHAR(255),
-            created_at timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    
+    @task
+    def extract_user_data():
+        # 테이블 생성 task
+        create_table = SQLExecuteQueryOperator(
+            task_id='create_table',
+            sql="""
+            CREATE TABLE IF NOT EXISTS users (
+                id INT PRIMARY KEY,
+                firstname VARCHAR(255),
+                lastname VARCHAR(255),
+                email VARCHAR(255),
+                created_at timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """,
+            conn_id='postgres',
+            database='airflow'
         )
-        """,
-        conn_id='postgres',
-        database='airflow'
-    )
+        create_table()
 
     # 데이터 변환 task
     # @task
