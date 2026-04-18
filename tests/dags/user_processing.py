@@ -40,7 +40,8 @@ def user_processing():
     # 데이터 변환 task
     @task.sensor(poke_interval=30, timeout=300)
     def is_api_available()  -> PokeReturnValue:
-        response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json", headers=headers)
         print(f"API Response Status Code: {response.status_code}")
         if  response.status_code == 200:
             condition = True
