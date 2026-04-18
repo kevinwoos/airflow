@@ -40,27 +40,21 @@ def user_processing():
     # 데이터 변환 task
     @task.sensor(poke_interval=30, timeout=300)
     def is_api_available()  -> PokeReturnValue:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json", headers=headers)
+        # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+        # response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json", headers=headers)
+        response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
         print(f"API Response Status Code: {response.status_code}")
         if  response.status_code == 200:
             condition = True
-            data = response.json()
-            ip_address = data['metadata']['ipAddress']
+            fake_user = response.json()
         else:
             condition = False
-            ip_address = None
+            fake_user = None
         
-        return PokeReturnValue(is_done=condition, xcom_value={'ipAddress': ip_address})
+        return PokeReturnValue(is_done=condition, xcom_value=fake_user)
 
     # Task 의존성 설정
     # extract_user_data() >> is_api_available()
     is_api_available()
-
-class CheckUserDataSensor(BaseSensorOperator):
-    def poke(self, context):
-        # 조건 체크: 예를 들어, users 테이블에 데이터가 있는지 확인
-        # 간단한 예시로 True를 반환
-        return PokeReturnValue(is_done=True, xcom_value={'status': 'data_ready', 'message': 'User data is available'})
 
 user_processing()
