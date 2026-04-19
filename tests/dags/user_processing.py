@@ -85,4 +85,6 @@ def user_processing():
     process_user(user_info)
     store_user()
 
+    process_user(create_table >> extract_user_data(is_api_available())) >> store_user()
+
 user_processing()
