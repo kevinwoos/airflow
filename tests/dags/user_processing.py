@@ -44,7 +44,7 @@ def user_processing():
         }
 
     @task.sensor(poke_interval=30, timeout=300)
-    def is_api_available()  -> PokeReturnValue:
+    def is_api_available(**context)  -> PokeReturnValue:
         response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
         print(f"API Response Status Code: {response.status_code}")
         if  response.status_code == 200:
