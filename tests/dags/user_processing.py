@@ -66,8 +66,17 @@ def user_processing():
             writer.writeheader()
             writer.writerow(user_info)
 
+    @task
+    def store_user():
+        hook = PostgresHook(postgres_conn_id='postgres')
+        hook.copy_expert(
+            sql="COPY users FROM STDIN WITH CSV HEADER",
+            filename='/tmp/user_info.csv'
+        )
+
     fake_user = is_api_available()
     user_info = extract_user_data()
     process_user(fake_user)
+    store_user()
 
 user_processing()
