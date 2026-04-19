@@ -5,6 +5,7 @@ from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.decorators import task
 from datetime import datetime
 from airflow.sensors.base import BaseSensorOperator, PokeReturnValue
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 import requests
 # import pandas as pd
 
@@ -37,11 +38,8 @@ def user_processing():
         )
         create_table()
 
-    # 데이터 변환 task
     @task.sensor(poke_interval=30, timeout=300)
     def is_api_available()  -> PokeReturnValue:
-        # headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        # response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json", headers=headers)
         response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
         print(f"API Response Status Code: {response.status_code}")
         if  response.status_code == 200:
@@ -52,9 +50,25 @@ def user_processing():
             fake_user = None
         
         return PokeReturnValue(is_done=condition, xcom_value=fake_user)
+    
+    @task
+    def process_user(user_info):
+        import csv
 
-    # Task 의존성 설정
-    # extract_user_data() >> is_api_available()
-    is_api_available()
+        user_info =  {
+            "id": 1,
+            "firstname": "John",
+            "lastname": "Doe",
+            "email": "
+        }
+    
+        with open('/tmp/processed_user.csv', 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=user_info.keys())
+            writer.writeheader()
+            writer.writerow(user_info)
+
+    fake_user = is_api_available()
+    user_info = extract_user_data()
+    process_user(fake_user)
 
 user_processing()
