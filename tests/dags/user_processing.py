@@ -31,7 +31,7 @@ def user_processing():
         )
         """,
         conn_id='postgres',
-        database='airflow'
+        database='postgres'
     )
 
     @task
