@@ -40,7 +40,7 @@ def user_processing():
             "id": fake_user['id'],
             "firstname": fake_user['personalInfo']['firstName'],
             "lastname": fake_user['personalInfo']['lastName'],
-            "email": fake_user['email'],
+            "email": fake_user['personalInfo']['email'],
         }
 
     @task.sensor(poke_interval=30, timeout=300)
