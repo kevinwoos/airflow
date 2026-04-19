@@ -75,8 +75,8 @@ def user_processing():
         )
 
     fake_user = is_api_available()
-    user_info = extract_user_data()
-    process_user(fake_user)
+    user_info = extract_user_data(fake_user)
+    process_user(user_info)
     store_user()
 
 user_processing()
