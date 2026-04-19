@@ -36,7 +36,6 @@ def user_processing():
             conn_id='postgres',
             database='airflow'
         )
-        create_table()
 
     @task.sensor(poke_interval=30, timeout=300)
     def is_api_available()  -> PokeReturnValue:
