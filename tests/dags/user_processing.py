@@ -59,7 +59,7 @@ def user_processing():
             "id": 1,
             "firstname": "John",
             "lastname": "Doe",
-            "email": "
+            "email": "jone.doe@example.com",
         }
     
         with open('/tmp/processed_user.csv', 'w', newline='') as f:
