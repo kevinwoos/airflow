@@ -27,7 +27,7 @@ def user_processing():
             firstname VARCHAR(255),
             lastname VARCHAR(255),
             email VARCHAR(255),
-            created_at timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at timestamp DEFAULT CURRENT_TIMESTAMP
         )
         """,
         conn_id='postgres',
