@@ -19,7 +19,7 @@ def _extract_user(ti):
 def user_processing():
     
     create_table = SQLExecuteQueryOperator(
-        task_id="create_table11",
+        task_id="create_table",
         conn_id="postgres",
         sql="""
         CREATE TABLE IF NOT EXISTS users (

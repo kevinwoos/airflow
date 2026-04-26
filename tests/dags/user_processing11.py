@@ -7,7 +7,7 @@ from airflow.providers.postgres.hooks.postgres import PostgresHook
 def user_processing():
     
     create_table = SQLExecuteQueryOperator(
-        task_id="create_table0",
+        task_id="create_table",
         conn_id="postgres",
         sql="""
         CREATE TABLE IF NOT EXISTS users (
