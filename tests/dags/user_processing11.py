@@ -1,25 +1,13 @@
 from airflow.sdk import dag, task
 from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.sdk.bases.sensor import PokeReturnValue
-from airflow.providers.standard.operators.python import PythonOperator
+from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-def _extract_user(ti):
-    #fake_user = ti.xcom_pull(task_ids="is_api_available")
-    import requests
-    response = requests.get("https://raw.githubusercontent.com/marclamberti/datasets/refs/heads/main/fakeuser.json")
-    fake_user = response.json()
-    return {
-        "id": fake_user["id"],
-        "firstname": fake_user["personalInfo"]["firstName"],
-        "lastname": fake_user["personalInfo"]["lastName"],
-        "email": fake_user["personalInfo"]["email"],
-    }
-    
 @dag
 def user_processing():
     
     create_table = SQLExecuteQueryOperator(
-        task_id="create_table11",
+        task_id="create_table0",
         conn_id="postgres",
         sql="""
         CREATE TABLE IF NOT EXISTS users (
@@ -45,11 +33,32 @@ def user_processing():
             fake_user = None
         return PokeReturnValue(is_done=condition, xcom_value=fake_user)
     
-    extract_user = PythonOperator(
-        task_id="extract_user",
-        python_callable=_extract_user
-    )
-    
-    is_api_available()
+    @task
+    def extract_user(fake_user):
+        return {
+            "id": fake_user["id"],
+            "firstname": fake_user["personalInfo"]["firstName"],
+            "lastname": fake_user["personalInfo"]["lastName"],
+            "email": fake_user["personalInfo"]["email"],
+        }
+        
+    @task
+    def process_user(user_info):
+        import csv
+        from datetime import datetime
+        user_info["created_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open("/tmp/user_info.csv", "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=user_info.keys())
+            writer.writeheader()
+            writer.writerow(user_info)
+            
+    @task
+    def store_user():
+        hook = PostgresHook(postgres_conn_id="postgres")
+        hook.copy_expert(
+            sql="COPY users FROM STDIN WITH CSV HEADER",
+            filename="/tmp/user_info.csv"
+        )
+    process_user(extract_user(create_table >> is_api_available())) >> store_user()
             
 user_processing()

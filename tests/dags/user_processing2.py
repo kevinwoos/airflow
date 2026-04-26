@@ -20,7 +20,7 @@ def user_processing2():
     def extract_user_data():
         # 테이블 생성 task
         create_table = SQLExecuteQueryOperator(
-            task_id='create_table',
+            task_id='create_table12',
             sql="""
             CREATE TABLE IF NOT EXISTS users (
                 id INT PRIMARY KEY,
